@@ -13,7 +13,7 @@ import sys
 # Where the list of spurious words output by labelkeys.py is located
 inpath = 'spurious.txt'
 # Where your copy of wildbirds is located
-DIR = './waterbirds_v1.0'
+DIR = '/home/sonia/causal/special-octo-pancake/waterbirds_v1.0'
 # Directory where you want the modified waterbirds images to go
 outpath = './out'
 
@@ -28,7 +28,7 @@ outdir = []
 for thr in THRESH:
     outdir.append(os.path.join(outpath, f'th{thr}ps{PATCH_SIZE}wc{spurlen}'))
     if not(os.path.isdir(outdir[-1])):
-            os.mkdir(outdir[-1])
+            os.makedirs(outdir[-1])
 
 with open(inpath, 'r') as f:
     spur = f.readlines()
@@ -36,7 +36,7 @@ spur = [l.strip() for l in spur]
 spur = spur[:spurlen]
 print(spur)
 
-with open(os.path.join(DIR, 'metadata.csv'),'r') as f:
+with open('metadata.csv','r') as f:
     meta = f.readlines()
 meta = meta[1:]
 names = [l.split(',')[1] for l in meta]
