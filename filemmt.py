@@ -1,20 +1,24 @@
 import shutil
 import os
 
+######## Settings ########
+# Location of original copy of waterbirds
+origdatadir = './waterbirds_v1.0'
+# Directory where patched-out versions output by remspur.py are located (originally ./out)
+start = 'out'
+# Where to put modified datasets which are ready to be used in Dyah's code
+finish = 'ready'
+
+
 metadata='/home/sonia/special-octo-pancake/waterbirds_autoLF/metadata.csv'
 readme = '/home/sonia/special-octo-pancake/waterbirds_autoLF/RELEASE_v1.0.txt'
+metadata = os.path.join(origdatadir, 'metadata.csv')
+readme = os.path.join(origdatadir, 'RELEASE_v1.0.txt')
 
-start='out'
-root = 'ready'
-
-for f in ['th0.7ps75wc7', 'th0.7ps75wc8', 'th0.7ps75wc9', 'th0.7ps75wc11', 'th0.7ps75wc12', 'th0.7ps75wc13', 'th0.7ps75wc14', 'th0.6ps75wc7', 'th0.6ps75wc8', 'th0.6ps75wc9', 'th0.6ps75wc11', 'th0.6ps75wc12', 'th0.6ps75wc13', 'th0.6ps75wc14']:
-
-    if len(os.listdir(os.path.join(start, f))) != 200:
-        print('check', f)
+for f in os.listdir(start):
     shutil.copy(metadata, os.path.join(start,f))
     shutil.copy(readme, os.path.join(start,f))
 
-
-    os.mkdir(os.path.join(root, f)) # (re)make meaningfully-named enclosing dir in dest folder
-    shutil.move(os.path.join(start, f), os.path.join(root, f)) #move dir
-    shutil.move(os.path.join(root, f, f), os.path.join(root, f, 'waterbirds_v1.0')) #rename
+    os.mkdir(os.path.join(finish, f)) # (re)make meaningfully-named enclosing dir in dest folder
+    shutil.move(os.path.join(start, f), os.path.join(finish, f)) #move dir
+    shutil.move(os.path.join(finish, f, f), os.path.join(finish, f, 'waterbirds_v1.0')) #rename

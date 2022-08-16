@@ -1,4 +1,6 @@
-# Inference notenook for [CLIP prefix captioning](https://github.com/rmokady/CLIP_prefix_caption/)
+# Puts automatic captions on images.
+
+# Inference code for [CLIP prefix captioning](https://github.com/rmokady/CLIP_prefix_caption/)
 # Adapted from https://github.com/rmokady/CLIP_prefix_caption/blob/main/notebooks/clip_prefix_captioning_inference.ipynb
 # Disclaimer: the authors do not own any rights for the code or data.
 
@@ -8,6 +10,8 @@
 model_path='./conceptual_weights.pt'
 # Location of the waterbirds images
 DIR = './waterbirds_v1.0'
+# path where you want the output keywords to be
+outname = 'words.csv'
 
 
 import clip
@@ -55,11 +59,6 @@ def get_device(device_id: int) -> D:
 
 
 CUDA = get_device
-
-current_directory = os.getcwd()
-save_path = os.path.join(os.path.dirname(current_directory), "pretrained_models")
-os.makedirs(save_path, exist_ok=True)
-model_path = os.path.join(save_path, 'model_wieghts.pt')
 
 
 class MLP(nn.Module):
@@ -210,7 +209,7 @@ device = CUDA(1) if is_gpu else "cpu"
 model = model.to(device)
 
 
-with open(DIR+'metadata.csv','r') as f:
+with open(os.path.join(DIR,'metadata.csv'),'r') as f:
     meta = f.readlines()
 meta = meta[1:]
 names = [l.split(',')[1] for l in meta]
@@ -221,7 +220,7 @@ names = [l.split(',')[1] for l in meta]
 out = []
 
 for file in names:
-    image = io.imread(DIR+file)
+    image = io.imread(os.path.join(DIR, file))
     pil_image = PIL.Image.fromarray(image)
 
     image = preprocess(pil_image).unsqueeze(0).to(device)
@@ -238,6 +237,6 @@ for file in names:
     out.append(','.join(arr)+'\n')
 
 # write out
-with open('words.csv', 'w') as f:
+with open(outname, 'w') as f:
     f.write('caption,keywords...\n')
     f.writelines(out)

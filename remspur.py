@@ -5,38 +5,38 @@ import os
 from torchvision import io, transforms
 from torchvision.utils import Image, ImageDraw, save_image
 from torchvision.transforms.functional import to_pil_image, pil_to_tensor
-# import skimage.io as skio
 import torch
 import clip
 import sys
 
+######## Settings ########
+# Where the list of spurious words output by labelkeys.py is located
+inpath = 'spurious.txt'
+# Where your copy of wildbirds is located
+DIR = './waterbirds_v1.0'
+# Directory where you want the modified waterbirds images to go
+outpath = './out'
 
-thr = sys.argv[1]
-PATCH_SIZE = int(sys.argv[2])
-spurlen = int(sys.argv[3])
+thr = sys.argv[1] # thresholds before a patch is blacked out in form of comma-separated list eg 0.4,0.5,0.7
+PATCH_SIZE = int(sys.argv[2]) # patch size
+spurlen = int(sys.argv[3]) # number of spurious words to use
 
 THRESH=[float(t) for t in thr.split(',')]
-
-
 print('threshold:', THRESH, 'patch size:', PATCH_SIZE, 'spurious words length:', spurlen)
-
-wordf = 'spurious.txt'
-datadir = '/home/sonia/wildsOrig/data/waterbirds_v1.0'
 
 outdir = []
 for thr in THRESH:
-    outdir.append(f'./out/th{thr}ps{PATCH_SIZE}wc{spurlen}')
+    outdir.append(os.path.join(outpath, f'th{thr}ps{PATCH_SIZE}wc{spurlen}'))
     if not(os.path.isdir(outdir[-1])):
             os.mkdir(outdir[-1])
 
-with open(wordf, 'r') as f:
+with open(inpath, 'r') as f:
     spur = f.readlines()
 spur = [l.strip() for l in spur]
 spur = spur[:spurlen]
 print(spur)
 
-DIR = '/home/sonia/wildsOrig/data/waterbirds_v1.0/'
-with open(DIR+'metadata.csv','r') as f:
+with open(os.path.join(DIR, 'metadata.csv'),'r') as f:
     meta = f.readlines()
 meta = meta[1:]
 names = [l.split(',')[1] for l in meta]
@@ -52,7 +52,7 @@ with torch.no_grad():
 
 i=0
 for fname in names:
-    img = io.read_image(DIR + fname).to(torch.float)
+    img = io.read_image(os.path.join(DIR, fname)).to(torch.float)
     img = torch.reshape(img, (1,img.shape[0],img.shape[1],img.shape[2]))
     kh, kw = PATCH_SIZE, PATCH_SIZE  # kernel size
     dh, dw = PATCH_SIZE, PATCH_SIZE  # stride

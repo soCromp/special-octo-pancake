@@ -1,11 +1,23 @@
-# get keywords from wiki page associated with hypernym of each label
+# Gets keywords from Wikipedia page associated with hypernym of each label, then compares with
+# the image keywords output by infer.py to create on a list of spurious image keywords.
+
+######## Settings ########
+# Labels for your dataset go here
+labels = ['Landbird', 'Waterbird']
+# path where output of infer.py is located
+inpath = 'words.csv'
+# path where you want the output list of spurious words to go
+outpath = 'spurious.txt'
+
 import pandas as pd
 import spacy
 nlp=spacy.load('en_core_web_md')
 from string import punctuation
 from re import sub
 import nltk
-# !pip3 install wikipedia-api
+# !pip3 install wikipedia-api # execute if needed
+nltk.download('wordnet')
+nltk.download('omw-1.4')
 import wikipediaapi
 import wikipedia
 
@@ -30,7 +42,7 @@ def get_hotwords(text):
     return result # 5
 
 
-labels = [l.lower() for l in ['Landbird', 'Waterbird']]
+labels = [l.lower() for l in labels] 
 wiki = wikipediaapi.Wikipedia('en')
 out = []
 lwords = set()
@@ -41,12 +53,12 @@ for l in labels:
     if not page.exists(): 
         sugg = wikipedia.search(l, results=1)[0]
         page = wiki.page(sugg)
-        print(l, 'has no wiki page! :( Using', sugg, 'instead')
+        print(l, 'has no wiki page! Using', sugg, 'instead')
     
     intro = page.summary
     w = [lemmatizer.lemmatize(k) for k in get_hotwords(page.summary)]
     lwords = lwords.union(set(w)).union( lemmatizer.lemmatize(l) )
-    print(l, ':', w)
+
     out.append(','.join([l]+w)+'\n')
 
 
@@ -67,17 +79,16 @@ with open(path, 'r') as f:
         l = [lemmatizer.lemmatize(w) for w in l]
         cwords.append(set(l))
         for w in l: imgwords.append(w)
-print(cwords[:5])
+
 
 ls = pd.Series(list(lwords))
 cs = pd.Series(imgwords)
 s = cs[~cs.isin(ls)]
 s=s.value_counts() # get frequency of each word
-print(s.shape)
-print(s.to_string())
+
 
 spur = s.index[s>THRESHOLD].to_list()
-print(spur)
-with open('spurious.txt', 'w+') as f:
+
+with open(outpath, 'w+') as f:
     for w in spur:
         f.write(w+'\n')
