@@ -8,6 +8,7 @@ from torchvision.transforms.functional import to_pil_image, pil_to_tensor
 import torch
 import clip
 import sys
+import shutil
 
 ######## Settings ########
 # Where the list of spurious words output by labelkeys.py is located
@@ -24,11 +25,17 @@ spurlen = int(sys.argv[3]) # number of spurious words to use
 THRESH=[float(t) for t in thr.split(',')]
 print('threshold:', THRESH, 'patch size:', PATCH_SIZE, 'spurious words length:', spurlen)
 
+metadata='./metadata.csv'
+readme = './RELEASE_v1.0.txt'
+
 outdir = []
 for thr in THRESH:
-    outdir.append(os.path.join(outpath, f'th{thr}ps{PATCH_SIZE}wc{spurlen}'))
-    if not(os.path.isdir(outdir[-1])):
-            os.makedirs(outdir[-1])
+    pth = os.path.join(outpath, f'th{thr}ps{PATCH_SIZE}wc{spurlen}/waterbirds_v1.0')
+    outdir.append(pth)
+    if not(os.path.isdir(pth)):
+        os.makedirs(pth)
+        shutil.copy(metadata, pth)
+        shutil.copy(readme, pth)
 
 with open(inpath, 'r') as f:
     spur = f.readlines()
@@ -36,7 +43,7 @@ spur = [l.strip() for l in spur]
 spur = spur[:spurlen]
 print(spur)
 
-with open('metadata.csv','r') as f:
+with open(metadata,'r') as f:
     meta = f.readlines()
 meta = meta[1:]
 names = [l.split(',')[1] for l in meta]

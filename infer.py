@@ -10,8 +10,12 @@
 model_path='/home/sonia/causal/special-octo-pancake/conceptual_weights.pt'
 # Location of the waterbirds images
 DIR = '/home/sonia/causal/special-octo-pancake/waterbirds_v1.0'
-# path where you want the output keywords to be
-outname = 'words.csv'
+# Labels for your dataset go here
+labels = ['Landbird', 'Waterbird']
+# path where you want the list of spurious keywords to go
+captout = 'spurious.txt'
+
+######## Make image captions and keywords ########
 
 import spacy
 nlp=spacy.load('en_core_web_md') # if crashes, run python -m spacy download en_core_web_md
@@ -29,6 +33,13 @@ from tqdm import tqdm, trange
 import skimage.io as io
 import PIL.Image
 from string import punctuation
+
+from re import sub
+import nltk
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+import wikipediaapi # !pip3 install wikipedia-api # execute if needed
+import wikipedia
 
 
 N = type(None)
@@ -216,7 +227,9 @@ names = [l.split(',')[1] for l in meta]
 
 # read in metadata.csv
 # for each line/image, generate caption and update text
-out = []
+lemmatizer = nltk.WordNetLemmatizer()
+caps = [] #ith item is caption string of the ith image
+imgwords = [] #ith elem is a list of the lemmatized keywords for the ith image
 
 for file in names:
     image = io.imread(os.path.join(DIR, file))
@@ -228,14 +241,62 @@ for file in names:
         prefix_embed = model.clip_project(prefix).reshape(1, prefix_length, -1)
 
     caption = generate(model, tokenizer, embed=prefix_embed)
+    caps.append(caption)
 
     # extract keywords
     keywords = get_hotwords(caption)
-
-    arr = [caption]+keywords
-    out.append(','.join(arr)+'\n')
+    for k in keywords:
+        k = lemmatizer.lemmatize(k)
+        imgwords.append(k)
 
 # write out
-with open(outname, 'w') as f:
-    f.write('caption,keywords...\n')
-    f.writelines(out)
+# with open(imgout, 'w') as f:
+#     f.write('caption,keywords...\n')
+#     f.writelines(out)
+
+######## Get label keywords and choose spurious keywords ########
+
+THRESHOLD=20
+
+def get_hotwords(text):
+    text=sub("\[\d*\]", '', text)
+    result = []
+    pos_tag = ['PROPN', 'ADJ', 'NOUN'] # 1
+    doc = nlp(text.lower()) # 2
+    for token in doc:
+        # 3
+        if(token.text in nlp.Defaults.stop_words or token.text in punctuation):
+            continue
+        # 4
+        if(token.pos_ in pos_tag):
+            result.append(token.text)
+                
+    return result # 5
+
+labels = [l.lower() for l in labels] 
+wiki = wikipediaapi.Wikipedia('en')
+lwords = set() # keywords associated with any of the labels
+
+for l in labels:
+    sub(' ', '_', l)
+    page = wiki.page(l)
+    if not page.exists(): 
+        sugg = wikipedia.search(l, results=1)[0]
+        page = wiki.page(sugg)
+        print(l, 'has no wiki page! Using', sugg, 'instead')
+    
+    intro = page.summary
+    w = [lemmatizer.lemmatize(k) for k in get_hotwords(page.summary)]
+    lwords = lwords.union(set(w)).union( lemmatizer.lemmatize(l) )
+
+ls = pd.Series(list(lwords))
+cs = pd.Series(imgwords)
+s = cs[~cs.isin(ls)]
+s=s.value_counts() # get frequency of each word
+
+
+spur = s.index[s>THRESHOLD].to_list()
+
+with open(captout, 'w+') as f:
+    for w in spur:
+        f.write(w+'\n')
