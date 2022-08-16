@@ -7,13 +7,14 @@
 ######## Settings ########
 # Download model from https://drive.google.com/file/d/14pXWwB4Zm82rsDdvbGguLfx9F8aM7ovT/view
 # and set model_path to its location:
-model_path='./conceptual_weights.pt'
+model_path='/home/sonia/causal/special-octo-pancake/conceptual_weights.pt'
 # Location of the waterbirds images
-DIR = './waterbirds_v1.0'
+DIR = '/home/sonia/causal/special-octo-pancake/waterbirds_v1.0'
 # path where you want the output keywords to be
 outname = 'words.csv'
 
-
+import spacy
+nlp=spacy.load('en_core_web_md') # if crashes, run python -m spacy download en_core_web_md
 import clip
 import os
 from torch import nn
@@ -28,8 +29,6 @@ from tqdm import tqdm, trange
 import skimage.io as io
 import PIL.Image
 from string import punctuation
-import spacy
-nlp=spacy.load('en_core_web_md') # if crashes, run python -m spacy download en_core_web_md
 
 
 N = type(None)

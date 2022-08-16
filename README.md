@@ -2,6 +2,7 @@
 
 Setup
 - Install conda environment to run CLIP using `conda env create -f conda_autoLF.yml`
+- Run `python -m spacy download en_core_web_md` to download model for keyword extraction
 - Obtain the waterbirds dataset and update DIR in infer.py
 - Download ClipCap checkpoint from [https://drive.google.com/file/d/14pXWwB4Zm82rsDdvbGguLfx9F8aM7ovT/view](https://drive.google.com/file/d/14pXWwB4Zm82rsDdvbGguLfx9F8aM7ovT/view) and update model_path in infer.py
 

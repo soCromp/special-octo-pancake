@@ -15,10 +15,9 @@ nlp=spacy.load('en_core_web_md')
 from string import punctuation
 from re import sub
 import nltk
-# !pip3 install wikipedia-api # execute if needed
 nltk.download('wordnet')
 nltk.download('omw-1.4')
-import wikipediaapi
+import wikipediaapi # !pip3 install wikipedia-api # execute if needed
 import wikipedia
 
 

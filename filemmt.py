@@ -10,10 +10,8 @@ start = 'out'
 finish = 'ready'
 
 
-metadata='/home/sonia/special-octo-pancake/waterbirds_autoLF/metadata.csv'
-readme = '/home/sonia/special-octo-pancake/waterbirds_autoLF/RELEASE_v1.0.txt'
-metadata = os.path.join(origdatadir, 'metadata.csv')
-readme = os.path.join(origdatadir, 'RELEASE_v1.0.txt')
+metadata='./metadata.csv'
+readme = './RELEASE_v1.0.txt'
 
 for f in os.listdir(start):
     shutil.copy(metadata, os.path.join(start,f))

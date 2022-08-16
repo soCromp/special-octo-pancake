@@ -1,4 +1,4 @@
-name: clip_prefix_caption
+name: autolf
 channels:
   - pytorch
   - defaults
@@ -170,10 +170,9 @@ dependencies:
     - chardet==3.0.4
     - charset-normalizer==2.0.12
     - click==8.1.2
-    - clip==1.0
+    # - clip>=0.2.0
+    - git+https://github.com/openai/CLIP.git
     - defusedxml==0.7.1
-    - en-core-web-lg==3.2.0
-    - en-core-web-md==3.2.0
     - fastjsonschema==2.15.3
     - filelock==3.6.0
     - ftfy==6.1.1
@@ -223,4 +222,4 @@ dependencies:
     - webencodings==0.5.1
     - wikipedia==1.4.0
     - wikipedia-api==0.5.4
-prefix: /home/sonia/miniconda3/envs/clip_prefix_caption
+prefix: /home/sonia/miniconda3/envs/autolf
